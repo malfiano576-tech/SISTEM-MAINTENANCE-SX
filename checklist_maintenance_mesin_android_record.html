@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Checklist Maintenance Mesin</title>
+<style>
+:root{--navy:#142b3b;--navy2:#1d3d50;--gold:#c6a45b;--bg:#f3f5f7;--ink:#23313b;--muted:#71808a;--line:#e2e7eb;--white:#fff;--green:#23845b;--red:#bd4b4b;--orange:#b97922}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+header{background:linear-gradient(115deg,var(--navy),var(--navy2));color:white;padding:22px 28px;border-bottom:4px solid var(--gold)}
+header .small{color:#d5c49d;font-size:11px;letter-spacing:2px;font-weight:bold}header h1{font-size:23px;margin:7px 0 4px;letter-spacing:.5px}header p{margin:0;color:#d4dfe5;font-size:13px}
+.layout{display:flex;min-height:calc(100vh - 100px)}aside{width:245px;background:#fff;border-right:1px solid var(--line);padding:18px 12px;flex-shrink:0}
+.nav-title{font-size:10px;color:#9aa5ac;letter-spacing:1.5px;font-weight:bold;padding:10px 12px}
+nav button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:#52616b;text-align:left;padding:12px;border-radius:8px;font-size:13px;cursor:pointer;margin:3px 0}
+nav button.active,nav button:hover{background:#edf2f4;color:var(--navy);font-weight:bold}nav button .ico{width:20px;text-align:center;font-size:16px}
+main{padding:25px;width:calc(100% - 245px);max-width:1500px;margin:0 auto}
+.page{display:none}.page.active{display:block}.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}.page-head h2{margin:0 0 6px;font-size:21px;color:var(--navy)}.page-head p{margin:0;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}.stat,.card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px}.stat .label{font-size:12px;color:var(--muted)}.stat .value{font-size:28px;font-weight:bold;margin-top:8px;color:var(--navy)}.stat .hint{font-size:11px;color:var(--muted);margin-top:5px}
+.card{margin-bottom:16px}.card h3{font-size:15px;margin:0 0 14px;color:var(--navy)}.muted{color:var(--muted)}.small{font-size:12px}
+label{display:block;font-size:12px;font-weight:bold;color:#52616b;margin:0 0 6px}
+input,select,textarea{width:100%;border:1px solid #d7dfe4;border-radius:7px;padding:10px 11px;font:13px Arial;color:var(--ink);background:white;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#8aa4b4;box-shadow:0 0 0 2px #eaf0f3}textarea{min-height:65px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.field{margin-bottom:13px}.btn{border:0;border-radius:7px;padding:10px 15px;font-weight:bold;font-size:12px;cursor:pointer}.primary{background:var(--navy);color:white}.secondary{background:#edf1f3;color:var(--navy)}.gold{background:var(--gold);color:#182b36}.danger{background:#faeaea;color:var(--red)}.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.machine-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.machine-btn{background:white;border:1px solid var(--line);border-radius:9px;padding:13px;text-align:left;cursor:pointer}.machine-btn strong{display:block;color:var(--navy);font-size:14px;margin-bottom:8px}.machine-btn small{color:var(--muted);font-size:11px}
+.pill{display:inline-block;border-radius:20px;padding:4px 8px;font-size:10px;font-weight:bold;background:#edf1f3;color:#586873}.pill.ok{background:#e6f4ed;color:var(--green)}.pill.warn{background:#fff3df;color:var(--orange)}.pill.bad{background:#faeaea;color:var(--red)}
+.section-title{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:bold;color:var(--navy);padding-bottom:10px;border-bottom:1px solid var(--line);margin:18px 0 12px}.section-title span{background:#edf1f3;border-radius:6px;padding:5px 8px;font-size:11px}
+.check-row{display:grid;grid-template-columns:minmax(180px,1.1fr) minmax(150px,.8fr) minmax(180px,1fr) minmax(180px,1fr);gap:10px;align-items:start;padding:11px 0;border-bottom:1px solid #eef1f3}.check-row:last-child{border-bottom:0}.check-name{font-size:13px;font-weight:bold;padding-top:10px}.check-row label{font-size:10px;margin-bottom:4px}
+.status-choices{display:flex;gap:6px;flex-wrap:wrap}
+.status-choice{border:1px solid #d7dfe4;background:#fff;color:#52616b;border-radius:7px;padding:9px 11px;font-size:11px;font-weight:bold;cursor:pointer;min-height:42px;line-height:1.25;white-space:normal}
+.status-choice.active[data-status="OK"]{background:#e6f4ed;border-color:#23845b;color:#176641}
+.status-choice.active[data-status="Perlu Perbaikan"]{background:#faeaea;border-color:#bd4b4b;color:#a33232}
+.status-choice.active[data-status="Belum Perbaikan"]{background:#fff3df;border-color:#b97922;color:#8a5b16}
+@media(max-width:700px){.status-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.status-choice{width:100%;min-width:0;min-height:52px;padding:8px 4px;font-size:11px;overflow-wrap:anywhere}}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px;min-width:650px}
+.history-list{display:flex;flex-direction:column;gap:7px;min-width:245px}
+.history-item{display:grid;grid-template-columns:minmax(125px,1fr) auto;gap:4px 8px;align-items:center;padding:7px 8px;background:#f7f9fa;border:1px solid #e8edf0;border-radius:6px}
+.history-item-name{font-size:11px;font-weight:bold;color:#354b59}
+.history-item small{grid-column:1/-1;font-size:10px;line-height:1.4;color:#687780;overflow-wrap:anywhere}
+.history-item .pill{justify-self:start}
+.history-note,.history-note-line{color:#9b5c19!important}
+.history-note-line{padding:6px 8px;margin-bottom:5px;background:#fff7e9;border-left:3px solid #d6a44d;border-radius:3px;font-size:11px;overflow-wrap:anywhere}
+th{text-align:left;background:#f5f7f8;color:#5d6b74;font-size:11px}th,td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}td{line-height:1.45}
+.empty{text-align:center;padding:28px;color:#8a969d;font-size:13px}.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:14px}.toolbar .field{min-width:180px;margin:0}.toolbar .field.grow{flex:1}
+.note-box{background:#fff8e9;border:1px solid #f1dfb8;border-radius:8px;padding:11px;color:#795a23;font-size:12px;margin:12px 0}
+footer{text-align:center;color:#9aa5ac;font-size:10px;padding:22px}
+@media(max-width:1050px){.machine-grid{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.check-row{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){
+.layout{display:block}aside{width:100%;padding:7px;border-right:0;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav{display:flex;overflow-x:auto;gap:5px;scrollbar-width:thin}nav button{min-width:max-content;width:auto;padding:11px 13px;font-size:12px;margin:0}nav button .ico{display:inline;font-size:14px}.nav-title{display:none}
+main{width:100%;padding:12px;min-width:0}.form-grid{grid-template-columns:1fr;gap:8px}.machine-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.page-head{display:block;margin-bottom:14px}.page-head .btn-row{margin-top:12px}.check-row{grid-template-columns:1fr;gap:8px;padding:13px 0}.history-list{min-width:220px}
+.check-name{padding-top:0;font-size:14px;line-height:1.4}.check-row select,.check-row textarea,input,select,textarea{font-size:16px;min-height:43px}
+.check-row textarea{min-height:58px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{padding:12px}.stat .value{font-size:23px}
+header{padding:16px}header h1{font-size:19px;line-height:1.3}header p{font-size:12px;line-height:1.5}
+.card{padding:13px;margin-bottom:12px}.btn{min-height:42px;padding:11px 14px;font-size:13px}.btn-row{gap:7px}.btn-row .btn{flex:1}
+.toolbar{display:grid;grid-template-columns:1fr;gap:9px}.toolbar .field{min-width:0}
+table{font-size:11px}th,td{padding:9px 8px}.page-head h2{font-size:19px}
+}
+@media print{aside,.btn,.toolbar,header p{display:none!important}.layout{display:block}main{width:100%;padding:0}.page{display:none!important}.page.active{display:block!important}body{background:white}.card,.stat{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><div class="small">FACTORY MAINTENANCE MANAGEMENT</div><h1>SISTEM CHECKLIST MAINTENANCE MESIN</h1><p>Pencatatan pemeriksaan, pekerjaan tertunda, jadwal blower, dan persiapan maintenance berikutnya</p></header>
+<div class="layout">
+<aside><div class="nav-title">MENU UTAMA</div><nav>
+<button class="active" data-page="dashboard"><span class="ico">▦</span>Dashboard</button>
+<button data-page="checklist"><span class="ico">☑</span>Checklist Maintenance</button>
+<button data-page="projects"><span class="ico">⌁</span>Project Maintenance Selanjutnya</button>
+<button data-page="materials"><span class="ico">▤</span>Barang yang Harus Disiapkan</button>
+<button data-page="history"><span class="ico">◷</span>Riwayat Maintenance</button>
+</nav></aside>
+<main>
+<section class="page active" id="dashboard">
+<div class="page-head"><div><h2>Dashboard Maintenance</h2><p>Ringkasan status pemeriksaan seluruh mesin.</p></div><button class="btn primary" onclick="showPage('checklist')">+ Buka Checklist</button></div>
+<div class="grid" id="stats"></div>
+<div class="card"><h3>Status Mesin</h3><div id="dashboardMachines" class="machine-grid"></div></div>
+<div class="card"><h3>Pengingat Kebersihan Blower</h3><div class="table-wrap"><table><thead><tr><th>Mesin</th><th>Terakhir Dibersihkan</th><th>Jadwal Berikutnya</th><th>Status</th></tr></thead><tbody id="blowerDashboard"></tbody></table></div></div>
+<div class="card"><h3>Project Maintenance Berikutnya</h3><div id="dashboardProjects"></div></div>
+</section>
+<section class="page" id="checklist">
+<div class="page-head"><div><h2>Checklist Maintenance</h2><p>Pilih mesin, isi hasil pemeriksaan, dan simpan catatan maintenance.</p></div></div>
+<div class="card">
+<div class="form-grid">
+<div class="field"><label>Pilih Mesin</label><select id="machineSelect" onchange="loadMachine()"></select></div>
+<div class="field"><label>Tanggal Pemeriksaan</label><input type="date" id="inspectDate"></div>
+<div class="field"><label>Waktu Pemeriksaan</label><input type="time" id="inspectTime"></div>
+<div class="field"><label>Bulan Record</label><input type="text" id="recordMonth" readonly></div>
+<div class="field"><label>Tahun Record</label><input type="text" id="recordYear" readonly></div>
+<div class="field"><label>Status Mesin</label><select id="machineStatus"><option>Belum Maintenance</option><option>Perbaikan</option><option>Sudah Maintenance</option></select></div>
+<div class="field"><label>Nama Petugas / Paraf</label><input type="text" id="operatorParaf" placeholder="Masukkan nama yang mengerjakan" autocomplete="name"></div>
+</div>
+<div class="note-box">Pilih status setiap item. Jika ada pekerjaan tertunda, pilih “Tertunda” dan isi note agar dapat dicari melalui menu Project Maintenance Selanjutnya atau Riwayat.</div>
+<div id="checklistItems"></div>
+<div class="section-title"><span>JADWAL</span> Kebersihan Blower — setiap 3 bulan</div>
+<div class="form-grid">
+<div class="field"><label>Tanggal terakhir blower dibersihkan</label><input type="date" id="blowerLast" onchange="updateBlowerDate()"></div>
+<div class="field"><label>Jadwal berikutnya (otomatis)</label><input type="date" id="blowerNext" readonly></div>
+<div class="field"><label>Status jadwal blower</label><input id="blowerStatus" readonly value="Belum ada tanggal"></div>
+</div>
+<div class="field"><label>Keterangan kebersihan blower</label><textarea id="blowerDesc" placeholder="Keterangan kondisi blower..."></textarea></div>
+<div class="field"><label>Note jika tertunda</label><textarea id="blowerNote" placeholder="Alasan tertunda / tindakan yang diperlukan..."></textarea></div>
+<div class="btn-row"><button class="btn primary" onclick="saveMachine()">Simpan Checklist Mesin</button><button class="btn secondary" onclick="resetForm()">Kosongkan Form</button><button class="btn secondary" onclick="window.print()">Cetak</button></div>
+</div>
+</section>
+<section class="page" id="projects">
+<div class="page-head"><div><h2>Project Maintenance Selanjutnya</h2><p>Semua rencana pekerjaan dari seluruh mesin dikumpulkan di satu tempat.</p></div><button class="btn primary" onclick="openProjectForm()">+ Tambah Project</button></div>
+<div class="card" id="projectForm" style="display:none">
+<h3>Tambah Project Maintenance</h3><div class="form-grid">
+<div class="field"><label>Mesin</label><select id="projectMachine"></select></div>
+<div class="field"><label>Nama project / pekerjaan</label><input id="projectName" placeholder="Contoh: Ganti bearing motor"></div>
+<div class="field"><label>Target pelaksanaan</label><input type="date" id="projectDate"></div>
+</div><div class="field"><label>Keterangan / alasan</label><textarea id="projectDesc"></textarea></div><div class="field"><label>Note pekerjaan tertunda</label><textarea id="projectNote"></textarea></div>
+<div class="btn-row"><button class="btn primary" onclick="saveProject()">Simpan Project</button><button class="btn secondary" onclick="closeProjectForm()">Batal</button></div>
+</div>
+<div class="card"><div class="toolbar"><div class="field"><label>Filter mesin</label><select id="projectFilter" onchange="renderProjects()"><option value="">Semua Mesin</option></select></div><div class="field"><label>Status project</label><select id="projectStatusFilter" onchange="renderProjects()"><option value="">Semua</option><option>Direncanakan</option><option>Sudah Dikerjakan</option></select></div></div><div class="table-wrap"><table><thead><tr><th>Mesin</th><th>Project / Pekerjaan</th><th>Target</th><th>Keterangan / Note</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="projectTable"></tbody></table></div></div>
+</section>
+<section class="page" id="materials">
+<div class="page-head"><div><h2>Barang yang Harus Disiapkan</h2><p>Daftar sparepart, material, dan kebutuhan sebelum maintenance berikutnya.</p></div><button class="btn primary" onclick="openMaterialForm()">+ Tambah Barang</button></div>
+<div class="card" id="materialForm" style="display:none"><h3>Tambah Kebutuhan Barang</h3><div class="form-grid">
+<div class="field"><label>Mesin</label><select id="materialMachine"></select></div><div class="field"><label>Nama barang / sparepart</label><input id="materialName" placeholder="Nama barang"></div><div class="field"><label>Jumlah</label><input id="materialQty" placeholder="Contoh: 2 pcs"></div>
+</div><div class="form-grid"><div class="field"><label>Status persiapan</label><select id="materialStatus"><option>Belum Disiapkan</option><option>Sudah Disiapkan</option><option>Tertunda</option></select></div><div class="field"><label>Target dibutuhkan</label><input type="date" id="materialDate"></div><div class="field"><label>Penanggung jawab / peminta</label><input id="materialOwner" placeholder="Nama"></div></div>
+<div class="field"><label>Keterangan</label><textarea id="materialDesc"></textarea></div><div class="field"><label>Note jika tertunda</label><textarea id="materialNote"></textarea></div><div class="btn-row"><button class="btn primary" onclick="saveMaterial()">Simpan Barang</button><button class="btn secondary" onclick="closeMaterialForm()">Batal</button></div></div>
+<div class="card"><div class="toolbar"><div class="field"><label>Filter mesin</label><select id="materialFilter" onchange="renderMaterials()"><option value="">Semua Mesin</option></select></div><div class="field"><label>Status</label><select id="materialStatusFilter" onchange="renderMaterials()"><option value="">Semua</option><option>Belum Disiapkan</option><option>Sudah Disiapkan</option><option>Tertunda</option></select></div></div><div class="table-wrap"><table><thead><tr><th>Mesin</th><th>Barang</th><th>Jumlah</th><th>Target</th><th>Penanggung Jawab</th><th>Keterangan / Note</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="materialTable"></tbody></table></div></div>
+</section>
+<section class="page" id="history">
+<div class="page-head"><div><h2>Riwayat Maintenance</h2><p>Catatan pemeriksaan yang sudah disimpan.</p></div><div class="btn-row"><button class="btn secondary" onclick="exportCSV()">Export CSV</button><button class="btn secondary" onclick="window.print()">Cetak Laporan</button></div></div>
+<div class="card"><div class="toolbar"><div class="field"><label>Filter mesin</label><select id="historyFilter" onchange="renderHistory()"><option value="">Semua Mesin</option></select></div><div class="field"><label>Bulan</label><input type="month" id="historyMonth" onchange="renderHistory()"></div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Waktu</th><th>Bulan</th><th>Tahun</th><th>Mesin</th><th>Status Mesin</th><th>Nama Petugas / Paraf</th><th>Hasil Pemeriksaan</th><th>Note Tertunda</th><th>Aksi</th></tr></thead><tbody id="historyTable"></tbody></table></div></div>
+</section>
+<footer>MAINTENANCE CHECKLIST SYSTEM • Data tersimpan di browser perangkat ini</footer>
+</main></div>
+<script>
+const MACHINES=[...Array.from({length:28},(_,i)=>`MC ${i+1}`),"MS 29","MP 30"];
+const GROUPS=[
+{title:"KEBERSIHAN PENDINGIN",items:["Kipas panel","Kipas mesin"]},
+{title:"KEBERSIHAN KOMPONEN",items:["Box ultrasonic","Inverter","PLC"]},
+{title:"KERAPIAN JALUR HEATER",items:["Jalur heater"]},
+{title:"OLI DAN SILICONE",items:["Kelancaran dan kebersihan oli","Kelancaran motor silicone","Usia motor silicone"]}
+];
+const KEY="maintenanceChecklistV1";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"machines":{},"projects":[],"materials":[],"history":[]}');
+function persist(){localStorage.setItem(KEY,JSON.stringify(db));}
+function el(id){return document.getElementById(id)}
+function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function localTime(){const d=new Date();return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
+function syncRecordCalendar(){const v=el("inspectDate").value;if(!v)return;const d=new Date(v+"T00:00:00");el("recordMonth").value=d.toLocaleDateString("id-ID",{month:"long"});el("recordYear").value=d.getFullYear()}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function machineData(m){return db.machines[m]||{}}
+function statusClass(s){return s==="Sudah Maintenance"||s==="OK"||s==="Sudah Disiapkan"||s==="Sudah Dikerjakan"?"ok":s==="Perbaikan"||s==="Tertunda"||s==="Perlu Perbaikan"?"bad":"warn"}
+function pill(s){return `<span class="pill ${statusClass(s)}">${esc(s||"Belum diisi")}</span>`}
+function fillSelect(id,all=true){let x=el(id);if(!x)return;let v=x.value;x.innerHTML=(all?'<option value="">Semua Mesin</option>':'')+MACHINES.map(m=>`<option value="${m}">${m}</option>`).join("");x.value=v}
+function init(){
+["machineSelect","projectMachine","materialMachine"].forEach(id=>fillSelect(id,false));
+["projectFilter","materialFilter","historyFilter"].forEach(id=>fillSelect(id,true));
+el("inspectDate").value=localDate();
+el("inspectTime").value=localTime();
+syncRecordCalendar();
+el("historyMonth").value=new Date().toISOString().slice(0,7);
+renderChecklist();loadMachine();renderAll();
+}
+function showPage(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===p));document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===p));if(p==="dashboard")renderDashboard();if(p==="projects")renderProjects();if(p==="materials")renderMaterials();if(p==="history")renderHistory()}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+function renderChecklist(){let h="";GROUPS.forEach((g,gi)=>{h+=`<div class="section-title"><span>${String.fromCharCode(65+gi)}</span>${g.title}</div>`;g.items.forEach((it,ii)=>{let id=`g${gi}i${ii}`;h+=`<div class="check-row"><div class="check-name">${esc(it)}</div><div><label>Pilih Status (langsung tekan)</label><div class="status-choices" id="${id}choices"><button type="button" class="status-choice" data-status="OK" onclick="setItemStatus('${id}','OK')">✓ OK</button><button type="button" class="status-choice" data-status="Perlu Perbaikan" onclick="setItemStatus('${id}','Perlu Perbaikan')">⚠ Perlu Perbaikan</button><button type="button" class="status-choice" data-status="Belum Perbaikan" onclick="setItemStatus('${id}','Belum Perbaikan')">○ Belum Perbaikan</button></div><select id="${id}status" style="display:none"><option value="">Belum dipilih</option><option>OK</option><option>Perlu Perbaikan</option><option>Belum Perbaikan</option></select></div><div><label>Keterangan</label><textarea id="${id}desc" placeholder="Keterangan kondisi..."></textarea></div><div><label>Note jika tertunda / belum diperbaiki</label><textarea id="${id}note" placeholder="Isi jika ada pekerjaan yang belum diperbaiki..."></textarea></div></div>`})});el("checklistItems").innerHTML=h}
+function setItemStatus(id,status){el(id+"status").value=status;document.querySelectorAll("#"+id+"choices .status-choice").forEach(b=>b.classList.toggle("active",b.dataset.status===status))}
+function loadMachine(){let m=el("machineSelect").value,d=machineData(m);el("machineStatus").value=d.status||"Belum Maintenance";el("operatorParaf").value=d.operatorParaf||"";el("inspectDate").value=d.date||localDate();el("inspectTime").value=d.time||localTime();syncRecordCalendar();GROUPS.forEach((g,gi)=>g.items.forEach((it,ii)=>{let id=`g${gi}i${ii}`,v=(d.items||{})[it]||{};setItemStatus(id,v.status||"");el(id+"desc").value=v.desc||"";el(id+"note").value=v.note||""}));el("blowerLast").value=d.blowerLast||"";el("blowerDesc").value=d.blowerDesc||"";el("blowerNote").value=d.blowerNote||"";updateBlowerDate()}
+el("inspectDate").addEventListener("change",syncRecordCalendar);
+function updateBlowerDate(){let last=el("blowerLast").value;if(!last){el("blowerNext").value="";el("blowerStatus").value="Belum ada tanggal";return}let dt=new Date(last+"T00:00:00");dt.setMonth(dt.getMonth()+3);let next=dt.toISOString().slice(0,10);el("blowerNext").value=next;let today=new Date();today.setHours(0,0,0,0);let due=new Date(next+"T00:00:00");let days=Math.ceil((due-today)/86400000);el("blowerStatus").value=days<0?`Terlambat ${Math.abs(days)} hari`:days===0?"Sudah waktunya":days<=14?`Segera (${days} hari lagi)`:`Terjadwal (${days} hari lagi)`}
+function collectItems(){let o={};GROUPS.forEach((g,gi)=>g.items.forEach((it,ii)=>{let id=`g${gi}i${ii}`;o[it]={status:el(id+"status").value,desc:el(id+"desc").value,note:el(id+"note").value}}));return o}
+function saveMachine(){let m=el("machineSelect").value;if(!m)return alert("Pilih mesin terlebih dahulu.");let d={date:el("inspectDate").value,time:el("inspectTime").value||localTime(),month:new Date(el("inspectDate").value+"T00:00:00").toLocaleDateString("id-ID",{month:"long"}),year:new Date(el("inspectDate").value+"T00:00:00").getFullYear(),savedAt:new Date().toISOString(),status:el("machineStatus").value,operatorParaf:el("operatorParaf").value.trim(),items:collectItems(),blowerLast:el("blowerLast").value,blowerNext:el("blowerNext").value,blowerStatus:el("blowerStatus").value,blowerDesc:el("blowerDesc").value,blowerNote:el("blowerNote").value,updated:new Date().toISOString()};db.machines[m]=d;db.history.unshift({machine:m,...d});persist();alert("Checklist "+m+" berhasil disimpan.");renderAll()}
+function resetForm(){if(confirm("Kosongkan isian form mesin ini?")){GROUPS.forEach((g,gi)=>g.items.forEach((it,ii)=>{let id=`g${gi}i${ii}`;setItemStatus(id,"");el(id+"desc").value="";el(id+"note").value=""}));el("blowerLast").value="";el("blowerDesc").value="";el("blowerNote").value="";el("operatorParaf").value="";updateBlowerDate()}}
+function openProjectForm(){el("projectForm").style.display="block"}function closeProjectForm(){el("projectForm").style.display="none"}
+function saveProject(){let name=el("projectName").value.trim();if(!name)return alert("Isi nama project.");db.projects.unshift({id:Date.now(),machine:el("projectMachine").value,name,date:el("projectDate").value,desc:el("projectDesc").value,note:el("projectNote").value,status:"Direncanakan"});persist();["projectName","projectDate","projectDesc","projectNote"].forEach(x=>el(x).value="");closeProjectForm();renderAll()}
+function renderProjects(){let f=el("projectFilter").value,s=el("projectStatusFilter").value,arr=db.projects.filter(x=>(!f||x.machine===f)&&(!s||x.status===s));el("projectTable").innerHTML=arr.length?arr.map(x=>`<tr><td><b>${esc(x.machine)}</b></td><td>${esc(x.name)}</td><td>${esc(x.date||"-")}</td><td>${esc(x.desc||"-")}<br><span class="muted">${esc(x.note||"")}</span></td><td><select onchange="setProjectStatus(${x.id},this.value)"><option ${x.status==="Direncanakan"?"selected":""}>Direncanakan</option><option ${x.status==="Sudah Dikerjakan"?"selected":""}>Sudah Dikerjakan</option></select></td><td><button class="btn danger" onclick="deleteProject(${x.id})">Hapus</button></td></tr>`).join(""):'<tr><td colspan="6" class="empty">Belum ada project maintenance berikutnya.</td></tr>'}
+function setProjectStatus(id,v){let x=db.projects.find(a=>a.id===id);if(x){x.status=v;persist();renderAll()}}function deleteProject(id){if(confirm("Hapus project ini?")){db.projects=db.projects.filter(x=>x.id!==id);persist();renderAll()}}
+function openMaterialForm(){el("materialForm").style.display="block"}function closeMaterialForm(){el("materialForm").style.display="none"}
+function saveMaterial(){let name=el("materialName").value.trim();if(!name)return alert("Isi nama barang.");db.materials.unshift({id:Date.now(),machine:el("materialMachine").value,name,qty:el("materialQty").value,date:el("materialDate").value,owner:el("materialOwner").value,status:el("materialStatus").value,desc:el("materialDesc").value,note:el("materialNote").value});persist();["materialName","materialQty","materialDate","materialOwner","materialDesc","materialNote"].forEach(x=>el(x).value="");closeMaterialForm();renderAll()}
+function renderMaterials(){let f=el("materialFilter").value,s=el("materialStatusFilter").value,arr=db.materials.filter(x=>(!f||x.machine===f)&&(!s||x.status===s));el("materialTable").innerHTML=arr.length?arr.map(x=>`<tr><td><b>${esc(x.machine)}</b></td><td>${esc(x.name)}</td><td>${esc(x.qty||"-")}</td><td>${esc(x.date||"-")}</td><td>${esc(x.owner||"-")}</td><td>${esc(x.desc||"-")}<br><span class="muted">${esc(x.note||"")}</span></td><td><select onchange="setMaterialStatus(${x.id},this.value)"><option ${x.status==="Belum Disiapkan"?"selected":""}>Belum Disiapkan</option><option ${x.status==="Sudah Disiapkan"?"selected":""}>Sudah Disiapkan</option><option ${x.status==="Tertunda"?"selected":""}>Tertunda</option></select></td><td><button class="btn danger" onclick="deleteMaterial(${x.id})">Hapus</button></td></tr>`).join(""):'<tr><td colspan="8" class="empty">Belum ada barang yang perlu disiapkan.</td></tr>'}
+function setMaterialStatus(id,v){let x=db.materials.find(a=>a.id===id);if(x){x.status=v;persist();renderAll()}}function deleteMaterial(id){if(confirm("Hapus data barang ini?")){db.materials=db.materials.filter(x=>x.id!==id);persist();renderAll()}}
+function renderHistory(){let f=el("historyFilter").value,mo=el("historyMonth").value,arr=db.history.filter(x=>(!f||x.machine===f)&&(!mo||(x.date||"").startsWith(mo)));el("historyTable").innerHTML=arr.length?arr.map((x,i)=>{let issues=[];Object.entries(x.items||{}).forEach(([k,v])=>{if(v.status)issues.push(k+": "+v.status)});return `<tr><td>${esc(x.date||"-")}</td><td>${esc(x.time||"-")}</td><td>${esc(x.month||"-")}</td><td>${esc(x.year||"-")}</td><td><b>${esc(x.machine)}</b></td><td>${pill(x.status)}</td><td><b>${esc(x.operatorParaf||"-")}</b></td><td>${esc(issues.join("; ")||"Belum diisi")}</td><td>${esc(Object.values(x.items||{}).map(v=>v.note).filter(Boolean).join("; ")||x.blowerNote||"-")}</td><td><button class="btn danger" onclick="deleteHistory(${i},'${esc(x.machine)}','${esc(x.date)}')">Hapus</button></td></tr>`}).join(""):'<tr><td colspan="10" class="empty">Belum ada riwayat maintenance.</td></tr>'}
+function deleteHistory(index,m,date){if(!confirm("Hapus catatan riwayat ini?"))return;let arr=db.history.filter(x=>x.machine===m&&x.date===date);let target=arr[0];let real=db.history.indexOf(target);if(real>=0)db.history.splice(real,1);persist();renderHistory()}
+function renderDashboard(){let total=MACHINES.length,done=MACHINES.filter(m=>machineData(m).status==="Sudah Maintenance").length,repair=MACHINES.filter(m=>machineData(m).status==="Perbaikan").length,pending=MACHINES.filter(m=>!machineData(m).status||machineData(m).status==="Belum Maintenance").length;el("stats").innerHTML=[["Total Mesin",total,"Daftar mesin P1–P30"],["Sudah Maintenance",done,"Status terakhir"],["Belum Maintenance",pending,"Menunggu pemeriksaan"],["Perbaikan",repair,"Dalam penanganan"]].map(a=>`<div class="stat"><div class="label">${a[0]}</div><div class="value">${a[1]}</div><div class="hint">${a[2]}</div></div>`).join("");el("dashboardMachines").innerHTML=MACHINES.map(m=>{let d=machineData(m);return `<button class="machine-btn" onclick="el('machineSelect').value='${m}';loadMachine();showPage('checklist')"><strong>${m}</strong>${pill(d.status||"Belum Maintenance")}<small style="display:block;margin-top:8px">${d.date||"Belum diperiksa"}</small></button>`}).join("");let b=MACHINES.map(m=>({m,d:machineData(m)})).filter(x=>x.d.blowerNext).sort((a,b)=>a.d.blowerNext.localeCompare(b.d.blowerNext));el("blowerDashboard").innerHTML=b.length?b.map(x=>`<tr><td>${x.m}</td><td>${x.d.blowerLast||"-"}</td><td>${x.d.blowerNext}</td><td>${pill(x.d.blowerStatus)}</td></tr>`).join(""):'<tr><td colspan="4" class="empty">Tanggal pembersihan blower belum diisi.</td></tr>';let p=db.projects.filter(x=>x.status!=="Sudah Dikerjakan").slice(0,5);el("dashboardProjects").innerHTML=p.length?`<div class="table-wrap"><table><thead><tr><th>Mesin</th><th>Project</th><th>Target</th></tr></thead><tbody>${p.map(x=>`<tr><td>${x.machine}</td><td>${esc(x.name)}</td><td>${esc(x.date||"-")}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Belum ada project tertunda.</div>'}
+function renderAll(){renderDashboard();renderProjects();renderMaterials();renderHistory()}
+function exportCSV(){let rows=[["Tanggal","Mesin","Status Mesin","Item Pemeriksaan","Status Item","Keterangan","Note"]];db.history.forEach(x=>Object.entries(x.items||{}).forEach(([k,v])=>rows.push([x.date,x.machine,x.status,k,v.status,v.desc,v.note])));let csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="riwayat-maintenance.csv";a.click();URL.revokeObjectURL(a.href)}
+init();
+</script>
+</body></html>
